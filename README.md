@@ -21,14 +21,14 @@ npm run dev
 ```
 
 **3. Frontend**
-Open `project-2.html` in browser.
+Open `project.html` in browser.
 
 ---
 
 ## Files
 
 ```
-project-2.html, project-2.css, project-2.js
+project.html, project.css, project.js
 profile.html, profile.css, profile.js
 api.js
 backend/server.js, db.js
