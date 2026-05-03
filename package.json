@@ -1,0 +1,9 @@
+{
+  "name": "take-one-platform",
+  "version": "1.0.0",
+  "description": "Cloud-Powered Film Crew Platform",
+  "main": "index.html",
+  "scripts": {
+    "start": "serve ."
+  }
+}

@@ -126,6 +126,7 @@ function renderProjects(scripts) {
     const items = Array.isArray(scripts) ? scripts : [];
     const cards = items.map((script, index) => `
         <div class="project-card"
+             onclick="openScriptPreview(${script.id})"
              style="background: linear-gradient(160deg, ${cardTone(script.genre)} 0%, #06080A 100%)">
           <div class="pc-num">${String(index + 1).padStart(3, '0')}</div>
           <div class="pc-genre">${script.genre || 'General'}</div>
@@ -318,5 +319,97 @@ function showToast(msg) {
     toast.classList.add('show');
     setTimeout(() => toast.classList.remove('show'), 3000);
 }
+
+
+/* ── SCRIPT PREVIEW LOGIC ── */
+async function openScriptPreview(id) {
+    const modal = document.getElementById('scriptModal');
+    if (!modal) return;
+
+    try {
+        const response = await API.scripts.getById(id);
+        if (!response.success || !response.data) {
+            showToast('Could not load script details ✦');
+            return;
+        }
+
+        const script = response.data;
+        document.getElementById('scriptModalTitle').textContent = script.title;
+        document.getElementById('scriptModalGenre').textContent = script.genre;
+        document.getElementById('scriptModalAuthor').textContent = `By ${script.author_name || 'Anonymous'}`;
+        document.getElementById('scriptModalSynopsis').textContent = script.synopsis || 'No synopsis provided.';
+
+        const poster = document.getElementById('scriptModalPoster');
+        poster.style.background = `radial-gradient(circle at 50% 30%, ${cardTone(script.genre)}88, transparent 42%), linear-gradient(160deg, #141018 0%, #06080A 100%)`;
+
+        // Add script content section if it doesn't exist
+        let readSection = modal.querySelector('.script-read-section');
+        if (!readSection) {
+            readSection = document.createElement('div');
+            readSection.className = 'script-read-section';
+            readSection.innerHTML = `
+                <button class="script-read-toggle" onclick="toggleScriptContent()">Read Full Content ✦</button>
+                <div class="script-read-body" id="scriptContentBody" style="display: none;">
+                    <div class="script-read-text" id="scriptContentText">
+                        <!-- Content will be injected here -->
+                    </div>
+                </div>
+            `;
+            modal.querySelector('.script-modal-content').appendChild(readSection);
+        }
+
+        // Prepare the content
+        const contentBody = document.getElementById('scriptContentBody');
+        const contentText = document.getElementById('scriptContentText');
+        contentBody.style.display = 'none'; // Reset to collapsed
+        readSection.querySelector('.script-read-toggle').textContent = 'Read Full Content ✦';
+
+        if (script.content) {
+            contentText.innerHTML = formatScriptContent(script);
+        } else {
+            contentText.innerHTML = '<div class="script-empty">The author has not uploaded the full script content yet.</div>';
+        }
+
+        modal.style.display = 'flex';
+    } catch (err) {
+        console.error('Preview failed:', err);
+        showToast('Error opening preview ✦');
+    }
+}
+
+function formatScriptContent(script) {
+    const paragraphs = (script.content || '').split('\n').filter(p => p.trim());
+    const contentHtml = paragraphs.map(p => `<div class="script-doc-para">${p}</div>`).join('');
+
+    return `
+        <div class="script-doc-header">
+            <div class="script-doc-title">${script.title}</div>
+            <div class="script-doc-meta">GENRE: ${script.genre.toUpperCase()}</div>
+            <div class="script-doc-meta">AUTHOR: ${(script.author_name || 'ANONYMOUS').toUpperCase()}</div>
+            <div class="script-doc-divider"></div>
+        </div>
+        ${contentHtml}
+    `;
+}
+
+function toggleScriptContent() {
+    const body = document.getElementById('scriptContentBody');
+    const btn = document.querySelector('.script-read-toggle');
+    if (body.style.display === 'none') {
+        body.style.display = 'block';
+        btn.textContent = 'Close Script ✕';
+        body.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+        body.style.display = 'none';
+        btn.textContent = 'Read Full Content ✦';
+    }
+}
+
+/* Close modal on backdrop click */
+window.onclick = (e) => {
+    if (e.target.classList.contains('modal')) {
+        e.target.style.display = 'none';
+    }
+};
 
 loadProfile();

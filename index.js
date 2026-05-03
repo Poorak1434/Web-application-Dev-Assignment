@@ -180,7 +180,6 @@ document.getElementById('registerForm')?.addEventListener('submit', async (e) =>
     }
 });
 
-/* ── UPLOAD LOGIC ── */
 async function uploadScript() {
     const title = document.getElementById('scriptTitle').value.trim();
     const genre = document.getElementById('scriptTheme').value;
@@ -209,6 +208,114 @@ async function uploadScript() {
         showToast('❌ Cloud upload failed');
     }
 }
+
+/* ── SCRIPT PREVIEW MODAL ── */
+async function openScriptPreview(id) {
+    const modal = document.getElementById('scriptModal');
+    if (!modal) return;
+
+    // Reset modal to loading state
+    document.getElementById('scriptModalTitle').textContent = 'Loading…';
+    document.getElementById('scriptModalGenre').textContent = '—';
+    document.getElementById('scriptModalAuthor').textContent = '—';
+    document.getElementById('scriptModalSynopsis').textContent = 'Fetching script signal…';
+    document.getElementById('scriptModalRoles').textContent = 'Open for collaboration';
+    document.getElementById('scriptModalStatus').textContent = 'Live';
+
+    // Clear any existing read-content section
+    const existingReadSection = document.getElementById('scriptReadContent');
+    if (existingReadSection) existingReadSection.remove();
+
+    modal.style.display = 'flex';
+
+    try {
+        const res = await API.scripts.getById(id);
+        const s = res.data;
+
+        document.getElementById('scriptModalTitle').textContent = s.title || 'Untitled';
+        document.getElementById('scriptModalGenre').textContent = (s.genre || 'General').toUpperCase();
+        document.getElementById('scriptModalAuthor').textContent = `By ${s.author_name || 'Anonymous'}`;
+        document.getElementById('scriptModalSynopsis').textContent = s.synopsis || 'No synopsis provided.';
+        document.getElementById('scriptModalRoles').textContent = `Genre: ${s.genre || 'General'}`;
+        document.getElementById('scriptModalStatus').textContent = 'Live Signal';
+
+        // Set poster background tint
+        const poster = document.getElementById('scriptModalPoster');
+        if (poster) {
+            if (s.poster_url) {
+                poster.style.backgroundImage = `url('${s.poster_url}')`;
+                poster.style.backgroundSize = 'cover';
+                poster.style.backgroundPosition = 'center';
+            } else {
+                poster.style.backgroundImage = `linear-gradient(160deg, ${getTone(s.genre)} 0%, #06080A 100%)`;
+            }
+        }
+
+        // Build the "Read Script" expandable section
+        const modalBody = modal.querySelector('.script-modal-body');
+        const readSection = document.createElement('div');
+        readSection.id = 'scriptReadContent';
+        readSection.className = 'script-read-section';
+        readSection.innerHTML = `
+            <button class="script-read-toggle" id="scriptReadToggle" onclick="toggleScriptContent()">
+                📄 Read Full Content ↓
+            </button>
+            <div class="script-read-body" id="scriptReadBody" style="display:none;">
+                <div class="script-read-text">${formatScriptContent(s.synopsis, s.title, s.author_name, s.genre)}</div>
+            </div>
+        `;
+        modalBody.after(readSection);
+
+        // Wire up Request to Join button
+        const reqBtn = document.getElementById('scriptModalRequestBtn');
+        if (reqBtn) {
+            reqBtn.onclick = () => {
+                if (!API.auth.isLoggedIn()) {
+                    modal.style.display = 'none';
+                    document.getElementById('loginModal').style.display = 'flex';
+                    showToast('Sign in to request collaboration ✦');
+                } else {
+                    showToast(`Collaboration request sent for "${s.title}" ✦`);
+                    reqBtn.textContent = 'Request Sent ✓';
+                    reqBtn.disabled = true;
+                    reqBtn.style.opacity = '0.6';
+                }
+            };
+        }
+
+    } catch (err) {
+        document.getElementById('scriptModalTitle').textContent = 'Error';
+        document.getElementById('scriptModalSynopsis').textContent = 'Could not load script. Please try again.';
+        showToast('❌ Failed to load script');
+    }
+}
+
+function toggleScriptContent() {
+    const body = document.getElementById('scriptReadBody');
+    const toggle = document.getElementById('scriptReadToggle');
+    if (!body || !toggle) return;
+    const isOpen = body.style.display !== 'none';
+    body.style.display = isOpen ? 'none' : 'block';
+    toggle.textContent = isOpen ? '📄 Read Full Content ↓' : '📄 Collapse ↑';
+}
+
+function formatScriptContent(synopsis, title, author, genre) {
+    // Format synopsis as a readable script-style document
+    if (!synopsis || synopsis.trim() === '') {
+        return `<em class="script-empty">No content has been added to this script yet.</em>`;
+    }
+    const escaped = synopsis.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const paragraphs = escaped.split(/\n+/).map(p => p.trim()).filter(Boolean);
+    return `
+        <div class="script-doc-header">
+            <div class="script-doc-title">${title || 'UNTITLED'}</div>
+            <div class="script-doc-meta">Written by ${author || 'Anonymous'} · ${(genre || 'General').toUpperCase()}</div>
+            <div class="script-doc-divider"></div>
+        </div>
+        ${paragraphs.map(p => `<p class="script-doc-para">${p}</p>`).join('')}
+    `;
+}
+
 
 /* ── UI HELPERS ── */
 function showToast(msg) {

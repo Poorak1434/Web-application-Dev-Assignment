@@ -128,6 +128,16 @@ const API = {
 
     // Scripts API
     scripts: {
+        getById: async (id) => {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/scripts?id=eq.${id}&select=*`, {
+                method: 'GET',
+                headers: headers
+            });
+            if (!response.ok) throw new Error('Failed to fetch script');
+            const data = await response.json();
+            if (!data || data.length === 0) throw new Error('Script not found');
+            return { success: true, data: data[0] };
+        },
         search: async (query = '', genre = '') => {
             let url = `${SUPABASE_URL}/rest/v1/scripts?select=*`;
             if (query) url += `&or=(title.ilike.*${query}*,synopsis.ilike.*${query}*)`;

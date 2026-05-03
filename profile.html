@@ -220,6 +220,30 @@
     <div style="height: 60px;"></div>
   </div><!-- /.profile-main -->
 
+  <!-- ── SCRIPT MODAL ── -->
+  <div id="scriptModal" class="modal">
+    <div class="modal-content script-modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title" id="scriptModalTitle">Script Preview</h2>
+        <button class="modal-close" id="closeScriptModalBtn" onclick="this.closest('.modal').style.display='none'">&times;</button>
+      </div>
+      <div class="script-modal-body">
+        <div class="script-poster-preview" id="scriptModalPoster">
+          <span id="scriptModalGenre">General</span>
+        </div>
+        <div class="script-modal-info">
+          <div class="script-modal-kicker" id="scriptModalAuthor">TAKE ONE creator</div>
+          <p id="scriptModalSynopsis">Open a live script to see the story, crew needs, and project signal.</p>
+          <div class="script-modal-tags">
+            <span id="scriptModalRoles">Open for collaboration</span>
+            <span id="scriptModalStatus">Live</span>
+          </div>
+          <button class="btn-upload" id="scriptModalRequestBtn" type="button" style="display:none;">Request To Join →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ── STATUS BAR ── -->
   <div class="status-bar">
     <div class="status-item">
