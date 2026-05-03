@@ -63,7 +63,8 @@
           <button class="avatar-edit"
                   onclick="document.getElementById('avatarInput').click()">✎</button>
           <input type="file" id="avatarInput" accept="image/*"
-                 onchange="changeAvatar(this)">
+                 onchange="changeAvatar(this)" style="display:none">
+          <button id="saveAvatarBtn" class="btn-sm" style="display:none; margin-top: 10px; width: 100%;" onclick="saveProfile()">Save Photo ✓</button>
         </div>
 
         <!-- Name & Role -->

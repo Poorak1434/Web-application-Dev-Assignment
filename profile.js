@@ -50,8 +50,16 @@ function switchTab(name, btn) {
 }
 
 /* ── AVATAR UPLOAD ── */
+let currentAvatarFile = null;
+
 function changeAvatar(input) {
     if (!input.files[0]) return;
+    currentAvatarFile = input.files[0];
+    
+    // Show the save button immediately
+    const saveBtn = document.getElementById('saveAvatarBtn');
+    if (saveBtn) saveBtn.style.display = 'block';
+
     const reader = new FileReader();
     reader.onload = e => {
         document.getElementById('profilePic').src = e.target.result;
@@ -172,11 +180,10 @@ function populateProfile(profile) {
 
     document.getElementById('editName').value = profile.name || '';
     document.getElementById('editRole').value = profile.role || '';
-    document.getElementById('editCollegeCity').value =
-        [profile.college, profile.city].filter(Boolean).join(' · ');
-    document.getElementById('editPortfolio').value = profile.portfolio || '';
     document.getElementById('editBio').value = profile.bio || '';
     document.getElementById('editSkills').value = profile.skills || '';
+    document.getElementById('editCollegeCity').value = `${profile.college || ''} · ${profile.city || ''}`;
+    document.getElementById('editPortfolio').value = profile.portfolio_url || '';
 
     renderSkillBadges(profile.skills);
     renderProjects(profile.scripts || []);
@@ -274,13 +281,28 @@ async function saveProfile() {
         name: document.getElementById('editName').value.trim(),
         role: document.getElementById('editRole').value.trim(),
         bio: document.getElementById('editBio').value.trim(),
-        skills: document.getElementById('editSkills').value.trim()
+        skills: document.getElementById('editSkills').value.trim(),
+        college: document.getElementById('editCollegeCity').value.split('·')[0]?.trim() || '',
+        city: document.getElementById('editCollegeCity').value.split('·')[1]?.trim() || '',
+        portfolio_url: document.getElementById('editPortfolio').value.trim()
     };
 
     try {
+        // Handle avatar upload if a new file was selected
+        if (currentAvatarFile) {
+            const fileName = `${user.id}-${Date.now()}.${currentAvatarFile.name.split('.').pop()}`;
+            const uploadRes = await API.storage.upload('avatars', fileName, currentAvatarFile);
+            if (uploadRes.success) {
+                updatedData.avatar_url = uploadRes.url;
+            }
+        }
+
         const response = await API.users.update(user.id, updatedData);
         if (response.success) {
-            showToast('Profile synced to cloud ✦');
+            showToast('Profile updated! ✓');
+            currentAvatarFile = null;
+            const saveBtn = document.getElementById('saveAvatarBtn');
+            if (saveBtn) saveBtn.style.display = 'none';
             setTimeout(() => window.location.reload(), 1000);
         }
     } catch (err) {

@@ -1,8 +1,3 @@
-/**
- * TAKE ONE — Cinematic Interaction & Cloud Logic
- * Connects the 'Void & Neon' UI to the Supabase backend.
- */
-
 /* ── CONFIG ── */
 const ANIM_DURATION = 800;
 
@@ -60,7 +55,7 @@ function initializeAnimations() {
 /* ── LIVE DATA SYNC ── */
 async function loadLiveScripts() {
     const statusEl = document.getElementById('liveScriptStatus');
-    if (statusEl) statusEl.textContent = 'Syncing cloud signals...';
+    if (statusEl) statusEl.textContent = 'Syncing...';
 
     try {
         const response = await API.home.get();
@@ -205,7 +200,7 @@ async function uploadScript() {
         });
 
         if (response.success) {
-            showToast('Script submitted to cloud ✦');
+            showToast('Script submitted! 🎬');
             document.getElementById('scriptTitle').value = '';
             document.getElementById('scriptDesc').value = '';
             loadLiveScripts();
@@ -243,11 +238,25 @@ document.getElementById('backToLoginLink')?.addEventListener('click', () => {
     loginModal.style.display = 'flex';
 });
 
-/* ── SEARCH ── */
+/* ── SEARCH & FILTER ── */
 const searchInput = document.getElementById('liveSearchInput');
+let currentGenre = 'all';
+
+async function filterCards(genre, btn) {
+    currentGenre = genre;
+    
+    // Update active tab UI
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+
+    // Fetch scripts for this genre
+    const response = await API.scripts.search(searchInput?.value || '', genre === 'all' ? '' : genre);
+    if (response.success) renderScriptCards(response.data);
+}
+
 searchInput?.addEventListener('input', debounce(async (e) => {
     const query = e.target.value.trim();
-    const response = await API.scripts.search(query);
+    const response = await API.scripts.search(query, currentGenre === 'all' ? '' : currentGenre);
     if (response.success) renderScriptCards(response.data);
 }, 300));
 

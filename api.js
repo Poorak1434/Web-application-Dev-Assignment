@@ -1,9 +1,3 @@
-/**
- * TAKE ONE — Supabase API Wrapper
- * This file replaces the local backend with Supabase cloud storage.
- * Uses standard 'fetch' to communicate with Supabase REST API.
- */
-
 const SUPABASE_URL = 'https://alkfuzmgxbstyzfnmabm.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFsa2Z1em1neGJzdHl6Zm5tYWJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3NzA2MTIsImV4cCI6MjA5MzM0NjYxMn0.ELUAWrRD48qi6VIzba87ioYdROqKfVuxno_AouLJl5g';
 
@@ -23,7 +17,6 @@ const API = {
             return user ? JSON.parse(user) : null;
         },
         saveToken: (token, user) => {
-            // We use the user object directly for simplicity in this mock-auth flow
             localStorage.setItem('takeone_user', JSON.stringify(user));
         },
         logout: () => {
@@ -72,7 +65,6 @@ const API = {
                 body: JSON.stringify(data)
             });
             const result = await response.json();
-            // Update local storage too
             const user = API.auth.getUser();
             localStorage.setItem('takeone_user', JSON.stringify({ ...user, ...data }));
             return { success: true, data: result[0] };
@@ -107,7 +99,7 @@ const API = {
                     creators: parseInt(userCount) + 50,
                     scripts: parseInt(scriptCount) + 10,
                     colleges: 8,
-                    roleCounts: { director: 12, camera: 8, writer: 15, sound: 5, editor: 6, gaffer: 4, actor: 20, spot_boy: 5 }
+                    roleCounts: { director: 12, camera: 8, writer: 15, sound: 5, editor: 6, gaffer: 4, actor: 20, spotBoy: 5 }
                 }
             };
         }
@@ -158,6 +150,26 @@ const API = {
                     outgoing: outgoing.map(r => ({ ...r, script_title: r.scripts?.title, script_genre: r.scripts?.genre })) 
                 } 
             };
+        }
+    },
+
+    // Storage API
+    storage: {
+        upload: async (bucket, path, file) => {
+            const response = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucket}/${path}`, {
+                method: 'POST',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': file.type
+                },
+                body: file
+            });
+            const result = await response.json();
+            if (result.Id || result.Key) {
+                return { success: true, url: `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}` };
+            }
+            throw new Error(result.error || 'Upload failed');
         }
     }
 };
