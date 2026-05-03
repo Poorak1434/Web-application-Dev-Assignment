@@ -145,7 +145,7 @@ function renderProjects(scripts) {
                     display: flex; flex-direction: column;
                     align-items: center; justify-content: center;
                     cursor: none;"
-             onclick="window.location='project.html#upload'">
+             onclick="window.location='index.html#upload'">
           <div style="font-size: 28px; color: rgba(255,77,26,0.3); margin-bottom: 8px;">+</div>
           <div style="font-size: 8px; letter-spacing: 0.3em; text-transform: uppercase;
                       color: rgba(255,77,26,0.4);">New Script</div>
