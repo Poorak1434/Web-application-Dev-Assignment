@@ -32,6 +32,10 @@ const API = {
                 method: 'GET',
                 headers: headers
             });
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({}));
+                throw new Error(err.message || 'Login request failed');
+            }
             const users = await response.json();
             if (users.length > 0) {
                 return { success: true, user: users[0], token: 'supabase-token' };
@@ -45,10 +49,27 @@ const API = {
                 body: JSON.stringify(userData)
             });
             const result = await response.json();
-            if (result.length > 0) {
+            if (!response.ok) {
+                // Supabase returns error objects, not arrays, on failure
+                const msg = result?.message || result?.error || 'Registration failed';
+                if (response.status === 409 || (msg && msg.toLowerCase().includes('duplicate'))) {
+                    throw new Error('An account with this email already exists.');
+                }
+                throw new Error(msg);
+            }
+            // On success, result is an array with the created row
+            if (Array.isArray(result) && result.length > 0) {
                 return { success: true, user_id: result[0].id };
             }
-            throw new Error('Registration failed');
+            // Some Supabase versions return a single object
+            if (result && result.id) {
+                return { success: true, user_id: result.id };
+            }
+            // If we got a 2xx but no data, still treat as success
+            if (response.ok) {
+                return { success: true };
+            }
+            throw new Error('Registration failed. Please try again.');
         },
         getProfile: async (id) => {
             const response = await fetch(`${SUPABASE_URL}/rest/v1/users?id=eq.${id}&select=*,scripts(*)`, {

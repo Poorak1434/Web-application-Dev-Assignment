@@ -176,7 +176,7 @@ document.getElementById('registerForm')?.addEventListener('submit', async (e) =>
             loginModal.style.display = 'flex';
         }
     } catch (err) {
-        showToast('❌ Registration failed');
+        showToast(`❌ ${err.message || 'Registration failed'}`);
     }
 });
 
