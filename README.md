@@ -1,25 +1,21 @@
-# TAKE ONE — Filmmaker Collaboration Platform
+# TAKE ONE
 
-A cinematic platform designed for college filmmakers to find crew, share scripts, and manage project requests in real-time.
+A platform for college filmmakers to find crew, share scripts, and collaborate on projects.
 
-## 🌐 Live Demo
-Check out the live platform here: [web-application-dev-assignment.vercel.app](https://web-application-dev-assignment.vercel.app)
+## Live Site
+[peppy-bienenstitch-5213b8.netlify.app](https://69f6fb98ff390f27323d5b4f--peppy-bienenstitch-5213b8.netlify.app/)
 
-## ✨ Features
-- **Script Explorer**: Browse and filter scripts by genre (Horror, Romance, Action, etc.)
-- **Live Creator Profiles**: Personalized profiles with skill badges and portfolio links
-- **Real-time Collaboration**: Integrated request system for script feedback and crew calls
-- **Cloud Infrastructure**: Powered by Supabase for secure data sync and high-speed image hosting
+## What it does
+- Browse scripts by genre and connect with writers
+- Build a creator profile with your skills and portfolio
+- Send and receive collaboration requests
+- Data is stored on Supabase so everything persists across sessions
 
-## 🛠️ Tech Stack
-- **Frontend**: Vanilla HTML5, CSS3 (Glassmorphism & Neon Aesthetics)
-- **Backend**: Supabase (PostgreSQL & Storage)
-- **API**: Custom REST wrapper for asynchronous cloud interaction
+## Stack
+- HTML, CSS, JavaScript (no frameworks)
+- Supabase for the database and file storage
 
-## 🚀 Getting Started
-1. Clone the repository.
-2. Open `index.html` in your browser.
-3. Use the authentication panel to sign in and start uploading.
-
----
-*Built for college film societies and independent creators.*
+## Running locally
+1. Clone the repo
+2. Open `index.html` in a browser
+3. Sign up or log in to access your profile
